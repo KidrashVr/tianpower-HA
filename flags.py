@@ -50,11 +50,6 @@ FLAGS = {
     (9, 0x20): ("DISC_Over_CURR_Alarm", "allarme"),
     (9, 0x40): ("BAT_CHG_Over_TEMP_Alarm", "allarme"),
     (9, 0x80): ("BAT_CHG_Low_TEMP_Alarm", "allarme"),
-    (10, 0x01): ("Cell_Over_Prot", "protezione/guasto"),
-    (10, 0x02): ("Pack_Over_Prot", "protezione/guasto"),
-    (10, 0x04): ("Cell_Under_Prot", "protezione/guasto"),
-    (10, 0x08): ("Pack_Under_Prot", "protezione/guasto"),
-    (11, 0x20): ("Full_Cha_Prot", "protezione/guasto"),
 }
 
 

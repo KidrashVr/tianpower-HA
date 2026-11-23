@@ -54,8 +54,5 @@ Dall'exe Windows (`flogbuff`, copia di 15 byte dei dati di stato). `flogbuff[k]`
 | 9 | 75 | 0x20 | DISC_Over_CURR_Alarm | allarme | 放过流告警 |
 | 9 | 75 | 0x40 | BAT_CHG_Over_TEMP_Alarm | allarme | 电池充电过温告警 |
 | 9 | 75 | 0x80 | BAT_CHG_Low_TEMP_Alarm | allarme | 电池充电欠温告警 |
-| 10 | 76 | 0x01 | Cell_Over_Prot | protezione/guasto | 单体过压保护 |
-| 10 | 76 | 0x02 | Pack_Over_Prot | protezione/guasto | 总体过压保护 |
-| 10 | 76 | 0x04 | Cell_Under_Prot | protezione/guasto | 单体欠压保护 |
-| 10 | 76 | 0x08 | Pack_Under_Prot | protezione/guasto | 总体欠压保护 |
-| 11 | 77 | 0x20 | Full_Cha_Prot | protezione/guasto | 满充保护 |
+
+Nota: nell'exe `flogbuff` viene riempito dalla risposta CMD 01 solo per gli indici 0-9 (byte 66-75). Le voci con indice 10-11 (Cell_Over_Prot, Pack_Over_Prot, Cell_Under_Prot, Pack_Under_Prot, Full_Cha_Prot) arrivano da un'altra fonte non ancora identificata e sono state tolte da `flags.py`: il byte 76 della risposta è l'intestazione del blocco id07, non un byte di stato.
