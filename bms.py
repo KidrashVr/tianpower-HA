@@ -1,14 +1,38 @@
 #!/usr/bin/env python3
-# Uso: python3 bms.py <dispositivo> <adr> [status|on|off]
+# Uso: python3 bms.py <dispositivo> <adr> [status|on|off|chg_on|chg_off|dis_on|dis_off]
 # Esempio: sudo python3 bms.py /dev/ttyUSB1 1 status
 import os, sys, time, select, termios
 
-# Frame fissi catturati dal software Windows (checksum non calcolabile, quindi per ADR)
-FRAMES = {
-    0: {"poll": "7e000100000d", "on": "7e00e30101fe0d", "off": "7e00e30102fa0d"},  # Carlotta
-    1: {"poll": "7e010100fe0d", "on": "7e01e30101f80d", "off": "7e01e30102fa0d"},  # Barbotta
-    2: {"poll": "7e020100fc0d", "on": "7e02e30101fa0d", "off": "7e02e30102fa0d"},  # Oscar
-}
+def checksum(b):
+    """Algoritmo del software Windows (Form1.check): (XOR ^ SOMMA) & 0xFF
+    su tutti i byte da 0x7e incluso fino alla fine dei dati."""
+    x = s = 0
+    for v in b:
+        x ^= v
+        s += v
+    return (x ^ s) & 0xFF
+
+
+def build(adr, cmd, data=b""):
+    f = bytes([0x7E, adr, cmd, len(data)]) + bytes(data)
+    return (f + bytes([checksum(f), 0x0D])).hex()
+
+
+class _Frames(dict):
+    def __missing__(self, adr):
+        if not 0 <= adr <= 255:
+            raise KeyError(adr)
+        self[adr] = {"poll": build(adr, 0x01), "on": build(adr, 0xE3, b"\x01"),
+                     "off": build(adr, 0xE3, b"\x02")}
+        return self[adr]
+
+
+# CMD d3: 1 connetti MOS carica, 2 disconnetti MOS carica, 3 connetti MOS scarica, 4 disconnetti MOS scarica
+MOS = {"chg_on": 1, "chg_off": 2, "dis_on": 3, "dis_off": 4}
+
+
+# Frame generati per qualsiasi ADR (0 Carlotta, 1 Barbotta, 2 Oscar)
+FRAMES = _Frames()
 
 
 def open_port(dev):
@@ -80,11 +104,16 @@ if __name__ == "__main__":
         sys.exit(__doc__)
     dev, adr = sys.argv[1], int(sys.argv[2])
     cmd = sys.argv[3] if len(sys.argv) > 3 else "status"
-    if adr not in FRAMES:
-        sys.exit("ADR %d: frame non ancora catturati" % adr)
     fr = FRAMES[adr]
     fd = open_port(dev)
     if cmd == "status":
         print(status(fd, bytes.fromhex(fr["poll"])))
     elif cmd in ("on", "off"):
         set_heater(fd, fr, cmd == "on")
+    elif cmd in MOS:
+        # MOSFET carica/scarica (CMD d3, dall'exe Windows). NON ancora verificati su BMS reale.
+        r = txrx(fd, bytes.fromhex(build(adr, 0xD3, bytes([MOS[cmd]]))), 1.5)
+        print("risposta:", r.hex() if r else None)
+        print(status(fd, bytes.fromhex(fr["poll"])))
+    else:
+        sys.exit("comando sconosciuto: " + cmd)

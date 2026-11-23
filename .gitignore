@@ -1,2 +1,6 @@
 *.ini
 __pycache__/
+*.pyc
+*.exe
+*.bin
+*.il
