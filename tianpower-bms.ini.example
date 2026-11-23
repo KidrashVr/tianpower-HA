@@ -1,0 +1,12 @@
+[mqtt]
+host = 192.168.0.100
+port = 1883
+user = mqtt_user
+password = CAMBIAMI
+
+[bms]
+# nome batteria, ADR (0 Carlotta, 1 Barbotta, 2 Oscar), porta seriale, intervallo di polling in secondi
+name = Carlotta
+adr = 0
+device = /dev/ttyACM0
+interval = 15
