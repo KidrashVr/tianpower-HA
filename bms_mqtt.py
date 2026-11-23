@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Tianpower BMS -> MQTT con discovery Home Assistant.
 Uso: bms_mqtt.py <config.ini>   (richiede bms.py nella stessa cartella e paho-mqtt)"""
-import configparser, json, queue, re, signal, sys, time
+import configparser, json, os, queue, re, signal, sys, time
 import paho.mqtt.client as mqtt
 import bms
 
@@ -12,25 +12,36 @@ NAME, ADR, DEV = B["name"], int(B["adr"]), B["device"]
 INTERVAL = int(B.get("interval", "15"))
 SLUG = re.sub(r"[^a-z0-9]+", "_", NAME.lower()).strip("_")
 BASE = "tianpower/" + SLUG
-AVAIL, STATE, CMD = BASE + "/availability", BASE + "/state", BASE + "/heater/set"
+AVAIL, SVC, STATE = BASE + "/availability", BASE + "/service", BASE + "/state"
+CMD = BASE + "/heater/set"
+POLLCMD, POLLSTATE = BASE + "/polling/set", BASE + "/polling"
 FR = bms.FRAMES[ADR]
 POLL = bytes.fromhex(FR["poll"])
 DEVICE = {"identifiers": ["tianpower_" + SLUG], "name": NAME,
           "manufacturer": "Tianpower", "model": "HY-CW007-B200LT55"}
 
 cmds = queue.Queue()
-avail = {"v": None}   # ultimo stato di disponibilita' pubblicato (None = da ripubblicare)
+avail = {"v": None}      # ultimo stato BMS pubblicato (None = da ripubblicare)
+st = {"paused": False}   # True = seriale rilasciata
 stop = []
 
 
 def discovery(client):
-    common = {"availability_topic": AVAIL, "device": DEVICE}
+    # le entita' sono disponibili solo se il servizio e' vivo (SVC) e il BMS risponde (AVAIL)
+    common = {"availability": [{"topic": AVAIL}, {"topic": SVC}],
+              "availability_mode": "all", "device": DEVICE}
     sw = dict(common, name="Riscaldatori", unique_id="tianpower_%s_heater" % SLUG,
               command_topic=CMD, state_topic=STATE,
               value_template="{{ value_json.heater }}",
               payload_on="ON", payload_off="OFF", icon="mdi:radiator")
     client.publish("homeassistant/switch/tianpower_%s/heater/config" % SLUG,
                    json.dumps(sw), retain=True)
+    pl = {"availability_topic": SVC, "device": DEVICE, "name": "Lettura BMS",
+          "unique_id": "tianpower_%s_polling" % SLUG, "command_topic": POLLCMD,
+          "state_topic": POLLSTATE, "payload_on": "ON", "payload_off": "OFF",
+          "icon": "mdi:serial-port"}
+    client.publish("homeassistant/switch/tianpower_%s/polling/config" % SLUG,
+                   json.dumps(pl), retain=True)
     sensors = [("pack_v", "Tensione pack", "V"), ("cell_min_mv", "Cella min", "mV"),
                ("cell_max_mv", "Cella max", "mV"), ("cell_delta_mv", "Delta celle", "mV")]
     for key, label, unit in sensors:
@@ -47,14 +58,20 @@ def on_connect(client, userdata, flags, rc, properties=None):
         print("connessione MQTT fallita:", rc, flush=True)
         return
     discovery(client)
-    client.subscribe(CMD)
+    client.subscribe([(CMD, 0), (POLLCMD, 0)])
+    client.publish(SVC, "online", retain=True)
+    client.publish(POLLSTATE, "OFF" if st["paused"] else "ON", retain=True)
     avail["v"] = None
 
 
 def on_message(client, userdata, msg):
     p = msg.payload.decode(errors="ignore").strip().upper()
-    if p in ("ON", "OFF"):
-        cmds.put(p == "ON")
+    if p not in ("ON", "OFF"):
+        return
+    if msg.topic == CMD:
+        cmds.put(("heater", p == "ON"))
+    elif msg.topic == POLLCMD:
+        cmds.put(("poll", p == "ON"))
 
 
 def apply_heater(fd, on):
@@ -84,6 +101,15 @@ def publish_state(client, s):
     set_avail(client, "online")
 
 
+def close_port(fd):
+    if fd is not None:
+        try:
+            os.close(fd)
+        except OSError:
+            pass
+    return None
+
+
 def main():
     cid = "tianpower-" + SLUG
     try:
@@ -91,7 +117,7 @@ def main():
     except AttributeError:
         client = mqtt.Client(client_id=cid)
     client.username_pw_set(M["user"], M.get("password"))
-    client.will_set(AVAIL, "offline", retain=True)
+    client.will_set(SVC, "offline", retain=True)
     client.on_connect, client.on_message = on_connect, on_message
     client.reconnect_delay_set(min_delay=2, max_delay=60)
     client.connect_async(M["host"], int(M.get("port", "1883")), 60)
@@ -102,14 +128,28 @@ def main():
     fd, fails, nxt = None, 0, 0.0
     while not stop:
         try:
+            try:
+                kind, val = cmds.get_nowait()
+            except queue.Empty:
+                kind = val = None
+            if kind == "poll":
+                st["paused"] = not val
+                client.publish(POLLSTATE, "OFF" if st["paused"] else "ON", retain=True)
+                if st["paused"]:
+                    fd = close_port(fd)
+                    set_avail(client, "offline")
+                else:
+                    nxt = 0.0
+                continue
+            if st["paused"]:
+                if kind == "heater":
+                    print("comando riscaldatori ignorato: lettura BMS in pausa", flush=True)
+                time.sleep(0.2)
+                continue
             if fd is None:
                 fd = bms.open_port(DEV)
-            try:
-                on = cmds.get_nowait()
-            except queue.Empty:
-                on = None
-            if on is not None:
-                s = apply_heater(fd, on)
+            if kind == "heater":
+                s = apply_heater(fd, val)
             elif time.time() >= nxt:
                 s = bms.status(fd, POLL)
             else:
@@ -126,15 +166,11 @@ def main():
                     set_avail(client, "offline")
         except OSError as e:
             print("errore seriale:", e, flush=True)
-            if fd is not None:
-                try:
-                    bms.os.close(fd)
-                except OSError:
-                    pass
-                fd = None
+            fd = close_port(fd)
             set_avail(client, "offline")
             time.sleep(5)
-    set_avail(client, "offline")
+    fd = close_port(fd)
+    client.publish(SVC, "offline", retain=True).wait_for_publish(2)
     client.loop_stop()
     client.disconnect()
 
