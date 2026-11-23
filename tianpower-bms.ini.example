@@ -12,11 +12,13 @@ device = /dev/ttyACM0
 interval = 15
 
 # Sicurezza riscaldatori: E3 li forza, non seguono le soglie del BMS. Temperature in gradi C.
-# Spegni quando la cella piu' fredda (T1-T3) e' >= soglia:
+# Spegni quando la cella piu' fredda (senza il sensore dei pad) e' >= soglia:
 heater_off_temp = 20
 # Durata massima in minuti:
 heater_max_minutes = 120
-# T4 e' vicino ai pad, spegni se >= soglia:
-t4_max_temp = 45
+# Sensore di temperatura cella (1-4) vicino ai pad, 0 se nessuno (Carlotta: 4):
+pad_sensor = 4
+# Spegni se il sensore vicino ai pad >= soglia:
+pad_max_temp = 45
 # Spegni se il MOSFET >= soglia:
 mos_max_temp = 60
