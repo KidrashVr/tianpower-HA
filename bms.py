@@ -53,6 +53,8 @@ def status(fd, poll):
                 "cell_min_mv": min(cells),
                 "cell_max_mv": max(cells),
                 "heater": bool(f[71] & 0x10),
+                # 6 temperature (id05): celle 1-4, MOSFET, ambiente = byte basso - 50
+                "temps": [f[53 + 2 * i] - 50 for i in range(6)],
                 "id06": f[66:76].hex(),
             }
     return None
