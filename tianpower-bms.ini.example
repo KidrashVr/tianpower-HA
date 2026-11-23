@@ -10,3 +10,13 @@ name = Carlotta
 adr = 0
 device = /dev/ttyACM0
 interval = 15
+
+# Sicurezza riscaldatori: E3 li forza, non seguono le soglie del BMS. Temperature in gradi C.
+# Spegni quando la cella piu' fredda (T1-T3) e' >= soglia:
+heater_off_temp = 20
+# Durata massima in minuti:
+heater_max_minutes = 120
+# T4 e' vicino ai pad, spegni se >= soglia:
+t4_max_temp = 45
+# Spegni se il MOSFET >= soglia:
+mos_max_temp = 60
