@@ -10,6 +10,11 @@ cfg.read(sys.argv[1] if len(sys.argv) > 1 else "/etc/tianpower-bms.ini")
 M, B = cfg["mqtt"], cfg["bms"]
 NAME, ADR, DEV = B["name"], int(B["adr"]), B["device"]
 INTERVAL = int(B.get("interval", "15"))
+# sicurezza riscaldatori (forzati da E3, non seguono le soglie del BMS)
+OFF_T = int(B.get("heater_off_temp", "20"))        # spegni quando la cella piu' fredda >= soglia
+MAX_MIN = int(B.get("heater_max_minutes", "120"))  # durata massima
+MOS_MAX = int(B.get("mos_max_temp", "60"))         # spegni subito se il MOSFET >= soglia
+T4_MAX = int(B.get("t4_max_temp", "45"))           # T4 e' vicino ai pad: spegni se >= soglia
 SLUG = re.sub(r"[^a-z0-9]+", "_", NAME.lower()).strip("_")
 BASE = "tianpower/" + SLUG
 AVAIL, SVC, STATE = BASE + "/availability", BASE + "/service", BASE + "/state"
@@ -22,7 +27,8 @@ DEVICE = {"identifiers": ["tianpower_" + SLUG], "name": NAME,
 
 cmds = queue.Queue()
 avail = {"v": None}      # ultimo stato BMS pubblicato (None = da ripubblicare)
-st = {"paused": False}   # True = seriale rilasciata
+st = {"paused": False, "last": None}   # paused: seriale rilasciata; last: ultimo stato letto
+heat = {"t0": None}      # istante in cui i riscaldatori sono stati visti accesi
 stop = []
 
 
@@ -42,12 +48,19 @@ def discovery(client):
           "icon": "mdi:serial-port"}
     client.publish("homeassistant/switch/tianpower_%s/polling/config" % SLUG,
                    json.dumps(pl), retain=True)
-    sensors = [("pack_v", "Tensione pack", "V"), ("cell_min_mv", "Cella min", "mV"),
-               ("cell_max_mv", "Cella max", "mV"), ("cell_delta_mv", "Delta celle", "mV")]
-    for key, label, unit in sensors:
+    sensors = [("pack_v", "Tensione pack", "V", "voltage"),
+               ("cell_min_mv", "Cella min", "mV", "voltage"),
+               ("cell_max_mv", "Cella max", "mV", "voltage"),
+               ("cell_delta_mv", "Delta celle", "mV", "voltage"),
+               ("t_cell_min", "Temp celle min (T1-T3)", "°C", "temperature"),
+               ("t_cell_max", "Temp celle max (T1-T3)", "°C", "temperature"),
+               ("t_t4", "Temp T4 (vicino ai pad)", "°C", "temperature"),
+               ("t_mos", "Temp MOSFET", "°C", "temperature"),
+               ("t_amb", "Temp ambiente", "°C", "temperature")]
+    for key, label, unit, dclass in sensors:
         s = dict(common, name=label, unique_id="tianpower_%s_%s" % (SLUG, key),
                  state_topic=STATE, value_template="{{ value_json.%s }}" % key,
-                 unit_of_measurement=unit, device_class="voltage", state_class="measurement")
+                 unit_of_measurement=unit, device_class=dclass, state_class="measurement")
         client.publish("homeassistant/sensor/tianpower_%s/%s/config" % (SLUG, key),
                        json.dumps(s), retain=True)
 
@@ -86,6 +99,30 @@ def apply_heater(fd, on):
     return bms.status(fd, POLL)
 
 
+def safety(fd, s):
+    """Con i riscaldatori accesi: spegne per temperatura raggiunta, MOSFET caldo o durata massima."""
+    if not s["heater"]:
+        heat["t0"] = None
+        return s
+    if heat["t0"] is None:
+        heat["t0"] = time.time()
+    cells, t4, mos = s["temps"][:3], s["temps"][3], s["temps"][4]   # T4 e' vicino ai pad
+    reason = None
+    if mos >= MOS_MAX:
+        reason = "MOSFET a %d C (max %d)" % (mos, MOS_MAX)
+    elif t4 >= T4_MAX:
+        reason = "T4 a %d C (max %d)" % (t4, T4_MAX)
+    elif min(cells) >= OFF_T:
+        reason = "celle a %d C (soglia %d)" % (min(cells), OFF_T)
+    elif time.time() - heat["t0"] > MAX_MIN * 60:
+        reason = "durata massima %d min" % MAX_MIN
+    if reason:
+        print("spegnimento automatico riscaldatori:", reason, flush=True)
+        heat["t0"] = None
+        return apply_heater(fd, False) or s
+    return s
+
+
 def set_avail(client, value):
     if avail["v"] != value:
         client.publish(AVAIL, value, retain=True)
@@ -96,6 +133,9 @@ def publish_state(client, s):
     payload = {"pack_v": s["pack_v"], "cell_min_mv": s["cell_min_mv"],
                "cell_max_mv": s["cell_max_mv"],
                "cell_delta_mv": s["cell_max_mv"] - s["cell_min_mv"],
+               "t_cell_min": min(s["temps"][:3]), "t_cell_max": max(s["temps"][:3]),
+               "t_t4": s["temps"][3],
+               "t_mos": s["temps"][4], "t_amb": s["temps"][5],
                "heater": "ON" if s["heater"] else "OFF"}
     client.publish(STATE, json.dumps(payload), retain=True)
     set_avail(client, "online")
@@ -149,7 +189,13 @@ def main():
             if fd is None:
                 fd = bms.open_port(DEV)
             if kind == "heater":
-                s = apply_heater(fd, val)
+                cur = bms.status(fd, POLL) or st["last"]   # temperature fresche
+                if val and cur and min(cur["temps"][:3]) >= OFF_T:
+                    print("ON ignorato: celle gia' a %d C (soglia %d)"
+                          % (min(cur["temps"][:3]), OFF_T), flush=True)
+                    s = cur
+                else:
+                    s = apply_heater(fd, val)
             elif time.time() >= nxt:
                 s = bms.status(fd, POLL)
             else:
@@ -158,6 +204,8 @@ def main():
             nxt = time.time() + INTERVAL
             if s:
                 fails = 0
+                s = safety(fd, s)
+                st["last"] = s
                 publish_state(client, s)
             else:
                 fails += 1
