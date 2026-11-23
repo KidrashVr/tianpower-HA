@@ -69,6 +69,20 @@ def discovery(client):
                ("t_amb", "Temp ambiente", "°C", "temperature")]
     if PAD:
         sensors.append(("t_pad", "Temp pad (T%d)" % PAD, "°C", "temperature"))
+    for key, label, icon in (("prot", "Protezioni attive", "mdi:shield-alert"),
+                             ("alarm", "Allarmi attivi", "mdi:alarm-light")):
+        s = dict(common, name=label, unique_id="tianpower_%s_%s" % (SLUG, key),
+                 state_topic=STATE, value_template="{{ value_json.%s }}" % key, icon=icon)
+        client.publish("homeassistant/sensor/tianpower_%s/%s/config" % (SLUG, key),
+                       json.dumps(s), retain=True)
+    for key, label, icon in (("heater", "Pad riscaldanti", "mdi:radiator"),
+                             ("chg_ut_prot", "Sotto-temperatura carica (protezione)", "mdi:snowflake-alert"),
+                             ("chg_open_low", "Carica bloccata: temperatura bassa", "mdi:snowflake-thermometer")):
+        s = dict(common, name=label, unique_id="tianpower_%s_bin_%s" % (SLUG, key),
+                 state_topic=STATE, value_template="{{ value_json.%s }}" % key,
+                 payload_on="ON", payload_off="OFF", icon=icon)
+        client.publish("homeassistant/binary_sensor/tianpower_%s/%s/config" % (SLUG, key),
+                       json.dumps(s), retain=True)
     # rimuove entita' di versioni precedenti
     client.publish("homeassistant/sensor/tianpower_%s/t_t4/config" % SLUG, "", retain=True)
     for key, label, unit, dclass in sensors:
@@ -151,6 +165,11 @@ def publish_state(client, s):
                "t_cell_min": min(cells), "t_cell_max": max(cells),
                "t_mos": mos, "t_amb": amb,
                "heater": "ON" if s["heater"] else "OFF"}
+    names = [n for n, _ in s["active"]]
+    payload["prot"] = ", ".join(n for n, t in s["active"] if t == "protezione/guasto")[:250] or "Nessuna"
+    payload["alarm"] = ", ".join(n for n, t in s["active"] if t == "allarme")[:250] or "Nessuno"
+    payload["chg_ut_prot"] = "ON" if "CHG_UN_TEMP_Protection" in names else "OFF"
+    payload["chg_open_low"] = "ON" if "CHG_Open_TEMP_Too_Low" in names else "OFF"
     if pad is not None:
         payload["t_pad"] = pad
     client.publish(STATE, json.dumps(payload), retain=True)

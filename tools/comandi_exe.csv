@@ -1,0 +1,171 @@
+handler,gruppo,riga/label,pulsante,pulsante_cn,CMD LEN DATA CHK 0d (dopo 7e ADR)
+timer_pcb_Tick,,,,,42 00 {check} 0d
+timer_bms_Tick,,,,,33 00 {check} 0d
+timer_data_Tick,,,,,01 00 {check} 0d
+timer_cs_Tick,,,,,06 00 {check} 0d
+button27_Click,Common Config,mAH / Cell Count,Write,写入,92 02 02 {} {check} 0d
+button24_Click,Common Config,Full Capacity / mAH,Write,写入,c9 02 {} {} {check} 0d
+button94_Click,Common Config,Remain_Capacity / mAH,写入,写入,ca 02 {} {} {check} 0d
+button25_Click,Common Config,PCB Barcode,Write,写入,ce 12 {add 32}
+button28_Click,Common Config,Nominal capacity / mAH,Sleep,强制休眠,cd 02 00 01 {check} 0d
+button57_Click,,充电电流：(1-5000mA),校准,校准,84 02 {} {} {check} 0d
+button58_Click,,充电电流：(5000mA以上) / 0,校准,校准,85 02 {} {} {check} 0d
+button59_Click,,放电电流：(1-5000mA),校准,校准,86 02 {} {} {check} 0d
+button60_Click,,放电电流：(5000mA以上),Adjust,校准,87 02 {} {} {check} 0d
+button61_Click,,充电电流：(1-5000mA),撤销,撤销,84 02 ff ff {check} 0d
+button62_Click,,充电电流：(5000mA以上) / 0,撤销,撤销,85 02 ff ff {check} 0d
+button63_Click,,放电电流：(1-5000mA),撤销,撤销,86 02 ff ff {check} 0d
+button64_Click,,放电电流：(5000mA以上),Reset,撤销,87 02 ff ff {check} 0d
+button65_Click,,SC_Count:,读取:,读取:,39 02 00 00 {check} 0d
+button70_Click,,SC_Count:,写入:,写入:,95 02 {} {} {check} 0d
+button66_Click,,OT_UT_Count:,读取:,读取:,3a 02 00 00 {check} 0d
+button71_Click,,OT_UT_Count:,写入:,写入:,96 02 {} {} {check} 0d
+button67_Click,,OC_Count:,读取:,读取:,3b 02 00 00 {check} 0d
+button72_Click,,OC_Count:,写入:,写入:,97 02 {} {} {check} 0d
+button68_Click,,OV_Count:,读取:,读取:,3c 02 00 00 {check} 0d
+button73_Click,,OV_Count:,写入:,写入:,98 02 {} {} {check} 0d
+button69_Click,,UV_Count:,Read,读取:,3d 02 00 00 {check} 0d
+button74_Click,,UV_Count:,写入:,写入:,99 02 {} {} {check} 0d
+button75_Click,,LOOP_Count:,Write,写入:,93 02 {} {} {check} 0d
+button76_Click,,,EnableBuzz,使能蜂鸣器,d1 02 01 01 {check} 0d
+button77_Click,,,DisableBuzz,不使能蜂鸣器,d1 02 01 00 {check} 0d
+button78_Click,MOS,,ConnectChg,连接充MOS,d3 01 01 {check} 0d
+button80_Click,MOS,,Disconnect,断开充MOS,d3 01 02 {check} 0d
+button79_Click,MOS,,ConnectDis,连接放MOS,d3 01 03 {check} 0d
+button81_Click,MOS,,Disconnect,断开放MOS,d3 01 04 {check} 0d
+button40_Click,Param,"After OV,Restore_Time(s)",读取,读取,db 01 02 {check}
+button29_Click,Param,"After OV,Restore_Time(s)",写入,写入,db 03 01 {} {} {check} 0d
+button41_Click,Param,"After OV,Restore_Vol(mV)",读取,读取,db 01 04 {check}
+button42_Click,Param,Start_Cell_Balance_V(mV),读取,读取,db 01 06 {check}
+button43_Click,Param,Stop_Cell_Balance_V(mV),读取,读取,db 01 08 {check}
+button44_Click,Param,Chg_Max_Time(s),读取,读取,db 01 0a {check}
+button45_Click,Param,Max_Balance_Count,读取,读取,db 01 0e {check}
+button46_Click,Param,"CellV under x(mV),Stop Chg",读取,读取,db 01 16 {check}
+button47_Click,Param,"PackV under x(10mV),Stop Chg",读取,读取,db 01 18 {check}
+button48_Click,Param,SOC_Alarm2_Level,读取,读取,db 01 10 {check}
+button49_Click,Param,SOC_Protect_Level,读取,读取,db 01 12 {check}
+button50_Click,Param,RATING_CAP(0.01Ah),Read,读取,db 01 14 {check}
+button30_Click,Param,"After OV,Restore_Vol(mV)",写入,写入,db 03 03 {} {} {check} 0d
+button31_Click,Param,Start_Cell_Balance_V(mV),写入,写入,db 03 05 {} {} {check} 0d
+button32_Click,Param,Stop_Cell_Balance_V(mV),写入,写入,db 03 07 {} {} {check} 0d
+button33_Click,Param,Chg_Max_Time(s),写入,写入,db 03 09 {} {} {check} 0d
+button34_Click,Param,Max_Balance_Count,写入,写入,db 03 0d {} {} {check} 0d
+button35_Click,Param,"CellV under x(mV),Stop Chg",写入,写入,db 03 15 {} {} {check} 0d
+button36_Click,Param,"PackV under x(10mV),Stop Chg",写入,写入,db 03 17 {} {} {check} 0d
+button37_Click,Param,SOC_Alarm2_Level,写入,写入,db 03 0f {} {} {check} 0d
+button38_Click,Param,SOC_Protect_Level,写入,写入,db 03 11 {} {} {check} 0d
+button39_Click,Param,RATING_CAP(0.01Ah),Write,写入,db 03 13 {} {} {check} 0d
+button56_Click,Bat_SerialNum,,ReadBoardIn,读取板级信息,dc 01 06 {6 check} {check}
+button117_Click,,,Read BMS Time,读取BMS时间,45 00 {check}
+button123_Click,,Start Time,Read,读取,d0 01 07 {check}
+button125_Click,,End Time,Read,读取,d0 01 08 {check}
+button122_Click,,Start Time,Write,写入,d0 07 04 {} {} {} {} {} {} {check} 0d
+button124_Click,,End Time,Write,写入,d0 07 05 {} {} {} {} {} {} {check} 0d
+button127_Click,,Interval Time / (min),Read,读取,d0 01 09 {check}
+button126_Click,,Interval Time / (min),Write,写入,d0 03 06 {} {} {check}
+button120_Click,,,Delete Record,删除存储记录,d0 01 03 {check}
+button118_Click,,yyyy-MM-dd HH:mm:ss,Write System Time,写入系统时间,cf 06 {} {} {} {} {} {} {check}
+timer_save_Tick,,,,,d0 01 01 {check}
+timer_cs2_Tick,,,,,06 00 {check} 0d
+button113_Click,Calibration Cell Voltage > ,,校准A点,校准A点,d6 04 1f 02 {} {} {check} 0d
+button129_Click,Calibration Cell Voltage > ,,校准B点,校准B点,d6 04 20 02 {} {} {check} 0d
+button130_Click,Common Config,Nominal capacity / mAH,Write,写入,db 03 13 {} {} {check} 0d
+button134_Click,,,Enable_Fan,打开风扇,e2 01 01 {check} 0d
+button133_Click,,,Disable_Fan,关闭风扇,e2 01 02 {check} 0d
+button138_Click,,,Enable_Heat,打开加热,e3 01 01 {check} 0d
+button137_Click,,,Disable_Heat,关闭加热,e3 01 02 {check} 0d
+button110_Click,Set Discharge Over Current Automatic Recovery Delay,,Set_Time,设置时间,e3 02 {256 div} {256} {check} 0d
+button141_Click,Intermittent Charging Rated Capacity,,读 取,读 取,e5 00 {check} 0d
+button111_Click,Intermittent Charging Rated Capacity,%,设 置,设 置,e4 02 {256 div} {256} {check} 0d
+button_mos1_Click,MOS High Temperature Protection,Frequency / Times,读 取,读 取,e6 00 {check} 0d
+button_mos3_Click,MOS High Temperature Protection,Open / ℃,读 取,读 取,e8 00 {check} 0d
+button_mos5_Click,MOS High Temperature Protection,Stop / ℃,读 取,读 取,e9 00 {check} 0d
+button_mos7_Click,MOS High Temperature Protection,Delay / mS,Read,读 取,ea 00 {check} 0d
+button_mos2_Click,MOS High Temperature Protection,Frequency / Times,设 置,设 置,e7 02 {256 div} {256} {check} 0d
+button_mos4_Click,MOS High Temperature Protection,Open / ℃,设 置,设 置,eb 02 {256 div} {256} {check} 0d
+button_mos6_Click,MOS High Temperature Protection,Stop / ℃,设 置,设 置,ec 02 {256 div} {256} {check} 0d
+button_mos8_Click,MOS High Temperature Protection,Delay / mS,Setting,设 置,ed 02 {256 div} {256} {check} 0d
+timer_readbhcs_Tick,,,,,db 03 {prot_read read_bhcs_flog} 00 00 {check}
+timer_readbhcs_Tick,,,,,{prot_read read_bhcs_flog} 00 {check} 00 00 {check} 0d
+timer_writebhcs_Tick,,,,,db 03 {prot_write writebhcs_flog} {} {} {check}
+timer_writebhcs_Tick,,,,,{prot_write writebhcs_flog} 03 {} {} {check} {check} 0d
+timer_writegjcs_Tick,,,,,9b 04 {prot_write writegjcs_flog} 02 {} {} {check} 0d
+button147_Click,Other,Full_Cap_Fac,Read,读 取,ed 00 {check} 0d
+button148_Click,Other,Full_Cap_Fac,Setting,设 置,ee 02 {div} {} {check} 0d
+button149_Click,Other,DSG_Curr_Samp,读 取,读 取,ef 00 {check} 0d
+button150_Click,Other,DSG_Curr_Samp,设 置,设 置,f0 02 {div} {} {check} 0d
+button9_Click,Heating Temperature Control,Heat_On_Temp,读 取,读 取,f1 00 {check} 0d
+button10_Click,Heating Temperature Control,Heat_On_Temp,设 置,设 置,f2 02 {div} {} {check} 0d
+button7_Click,Heating Temperature Control,Heat_Off_Temp,Read,读 取,f3 00 {check} 0d
+button8_Click,Heating Temperature Control,Heat_Off_Temp,Set,设 置,f4 02 {div} {} {check} 0d
+timer_datetime_Tick,,,,,45 00 {check}
+button11_Click,,,Unlock,解 锁,fb 02 ff ff {check} 0d
+button13_Click,Anti-Theft Mode,Charge Activation,Enable,设 置,fc 02 00 {} {check} 0d
+button12_Click,Anti-Theft Mode,Close_Security_Code,Disable,关 闭,fc 02 00 00 {check} 0d
+button14_Click,Anti-Theft Mode,Comm anti-theft,Read,读 取,fd 00 {check}
+button152_Click,Gyro information and configuration,X-axis recovery,读 取,读 取,ff 01 04 {check} 0d
+button154_Click,Gyro information and configuration,Y-axis recovery,读 取,读 取,ff 01 05 {check} 0d
+button157_Click,Gyro information and configuration,Instal_Method,Read,读 取,ff 01 07 {check} 0d
+button151_Click,Gyro information and configuration,X-axis recovery,设 置,设 置,fe 05 04 00 00 {comboBox16 get_Text ToInt32 180 add 256 div} {comboBox16 get_Text ToInt32 180 add 256} {check} 0d
+button153_Click,Gyro information and configuration,Y-axis recovery,设 置,设 置,fe 05 05 00 00 {textBox35 get_Text ToInt32 90 add 256 div} {textBox35 get_Text ToInt32 90 add 256} {check} 0d
+button155_Click,Gyro information and configuration,Z axis zero,Z axis zero,Z轴归零设置,fe 05 06 00 00 00 00 {check} 0d
+button156_Click,Gyro information and configuration,Instal_Method,Set,设 置,fe 05 07 00 00 {256 div} {256} {check} 0d
+button158_Click,Common Config,SN Code,Read,Read,dc 03 06 00 00 {check}
+button159_Click,Common Config,SN Code,Write,Write,dc {1 add} 01 {add}
+button160_Click,Gyro coordinate reading,X-axis coordinate,Read,读 取,ff 01 08 {check} 0d
+button161_Click,Gyro coordinate reading,Y-axis coordinate,读 取,读 取,ff 01 09 {check} 0d
+button162_Click,Gyro coordinate reading,Z-axis coordinate,读 取,读 取,ff 01 0a {check} 0d
+butt_g1_Click,Dry contact control,Dry  1,闭 合,,fe 05 0d 00 00 {256 div} {256} {check} 0d
+button165_Click,Section voltage compensation,Sect_Volt_Compe_Num,读 取,读 取,ff 01 0b {check} 0d
+button166_Click,Section voltage compensation,Sect_Volt_Compe_Num,设 置,设 置,fe 05 0b 00 00 {textBox48 get_Text ToInt32 256 div} {textBox48 get_Text ToInt32 256} {check} 0d
+button163_Click,Section voltage compensation,Sect_Volt_Compe_Ratio,读 取,读 取,ff 01 0c {check} 0d
+button164_Click,Section voltage compensation,Sect_Volt_Compe_Ratio,设 置,设 置,fe 05 0c 00 00 {textBox47 get_Text ToDouble mul div} {textBox47 get_Text ToDouble mul} {check} 0d
+timer_dis_Tick,,,,,ff 01 10 {check} 0d
+button168_Click,Tota_Volt_High to enter_Cur_Limit mode switch set,,Open,打 开,fe 05 11 00 00 00 00 {check} 0d
+button169_Click,Tota_Volt_High to enter_Cur_Limit mode switch set,,Read,读 取,ff 01 11 {check} 0d
+timer_pack_Tick,,,,,dc 03 06 00 00 {check}
+button135_Click,,Batt Model,Write,Write,dc {1 add} 03 {add}
+button16_Click,,Batt Model,Read,Read,dc 03 06 00 00 {check}
+button85_Click,Remote server Addr,,读 取,读 取,ff 01 01 {check} 0d
+button84_Click,Remote server Addr,,设 置,设 置,fe 05 01 {text_ip1 get_Text ToByte} {text_ip2 get_Text ToByte} {text_ip3 get_Text ToByte} {text_ip4 get_Text ToByte} {check} 0d
+button83_Click,Remote server Port,远程服务器端口,读 取,读 取,ff 01 02 {check} 0d
+button82_Click,Remote server Port,远程服务器端口,设 置,设 置,fe 05 02 00 00 {text_ip5 get_Text ToInt32 256 div} {text_ip5 get_Text ToInt32 256} {check} 0d
+button101_Click,Protect enable set,,读取,读取,d5 03 05 00 00 {check} 0d
+button136_Click,Protect enable set,,设置,设置,d5 03 02 {} {} {check} 0d
+button173_Click,,Comm_Time / h,读 取,读 取,5e 00 {check} 0d
+button174_Click,,Comm_Time / h,Set,设 置,ee 02 {256 div} {256} {check} 0d
+timer_com_Tick,,,,,ef 02 00 00 {check} 0d
+button175_Click,,,Zero_Calib,零点校准,60 02 ff ff {check} 0d
+button188_Click,,,Enable Sound/light,打开声光告警,63 02 00 01 {check} 0d
+button187_Click,,,Disable Sound/light,关闭声光告警,63 02 00 00 {check} 0d
+button189_Click,,,Read Sound/light,读取声光告警,62 00 {check} 0d
+button185_Click,Common Config,Nominal capacity / mAH,Read,读 取,db 03 14 00 00 {check} 0d
+button190_Click,,ENV_HT_Prot,Read,读取,d5 03 0a 00 00 {check} 0d
+button191_Click,,ENV_HT_Prot,Set,设置,d5 03 09 {} {} {check} 0d
+button192_Click,,Address / CAN type,读,读,f7 00 {check}
+button195_Click,,当前读取板号： / 485 type,Read,读,f9 00 {check}
+button193_Click,,Address / CAN type,写,写,f8 02 00 {} {check}
+button194_Click,,当前读取板号： / 485 type,Set,写,fa 02 00 {} {check}
+timer_jzA_Tick,,,,,d6 04 {2 jz_n mul 1 sub} 02 {} {} {check} 0d
+timer_zjB_Tick,,,,,d6 04 {2 jz_n mul} 02 {} {} {check} 0d
+button196_Click,Other,CHG_Curr_Samp,Read,读 取,fe 00 {check} 0d
+button197_Click,Other,CHG_Curr_Samp,Setting,设 置,ff 02 {div} {} {check} 0d
+button201_Click,,SOC_Start / %,Read,读 取,db 03 12 00 00 {check}
+button202_Click,,SOC_Start / %,Set,设 置,db 03 11 {} {} {check}
+button199_Click,,Cycles_Prot,Read,读 取,db 03 2c 00 00 {check}
+button200_Click,,Cycles_Prot,Set,设 置,db 03 2b {div} {} {check}
+baohcs_read,,,,,43 e0 {check} 0d
+baohcs_read_Ah,,,,,01 00 {check}
+gaojcs_read3,,,,,43 00 {check} 0d
+but_tt4_Click,Param Operation[Simple],CELL_Vol_Protect,写入,写入,db 03 {prot_write writebhcs_flog} {} {} {check}
+but_tt4_Click,Param Operation[Simple],CELL_Vol_Protect,写入,写入,{prot_write writebhcs_flog} 03 {} {} {check} {check} 0d
+but_tt5_Click,Param Operation[Simple],CELL_Vol_Protect,写入,写入,9b 04 {prot_write writegjcs_flog} 02 {} {} {check} 0d
+but_tt6_Click,Param Operation[Simple],CELL_Vol_Protect,读取,读取,db 03 {prot_read read_bhcs_flog} 00 00 {check}
+but_tt6_Click,Param Operation[Simple],CELL_Vol_Protect,读取,读取,{prot_read read_bhcs_flog} 00 {check} 00 00 {check} 0d
+timer_Save2_Tick,,,,,d0 01 1a {check}
+but_big3_Click,,,Delete Record,删除存储记录,d0 01 1f {check}
+but_big5_Click,,Read Speed,写入,写入,d0 03 e1 {} {} {check}
+but_big6_Click,,Read Speed,读取,读取,d0 01 e0 {check}
+but_big7_Click,,Read Count,读取,读取,d0 01 19 {check}
+but_big8_Click,,Interval Time / S,Write,写入,d0 03 11 {} {} {check}
+but_big9_Click,,Interval Time / S,Read,读取,d0 01 10 {check}

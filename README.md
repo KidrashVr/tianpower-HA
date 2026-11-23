@@ -3,7 +3,8 @@
 Lettura stato e controllo di BMS Tianpower (HY-CW007) via RS485, con pubblicazione MQTT per Home Assistant (discovery automatica).
 
 - `bms.py`: protocollo (9600 8N1), checksum e generazione dei frame per qualsiasi ADR, uso da riga di comando
-- `bms_mqtt.py`: servizio MQTT (switch riscaldatori e lettura BMS, sensori tensione, celle, temperature) con limiti di sicurezza
+- `bms_mqtt.py`: servizio MQTT (switch riscaldatori e lettura BMS, sensori tensione, celle, temperature, pad riscaldanti, protezioni e allarmi attivi, sotto-temperatura in carica) con limiti di sicurezza
+- `flags.py`: mappa dei bit di stato della risposta (dall'exe Windows), vedi `docs/mappa_bit_stato.md`
 - `tianpower-bms.service`: unit systemd
 - `tianpower-bms.ini.example`: configurazione di esempio (il vero `.ini` non va nel repo)
 - `docs/protocollo-bms.md`: appunti sul protocollo

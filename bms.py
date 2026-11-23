@@ -2,6 +2,7 @@
 # Uso: python3 bms.py <dispositivo> <adr> [status|on|off|chg_on|chg_off|dis_on|dis_off]
 # Esempio: sudo python3 bms.py /dev/ttyUSB1 1 status
 import os, sys, time, select, termios
+import flags
 
 def checksum(b):
     """Algoritmo del software Windows (Form1.check): (XOR ^ SOMMA) & 0xFF
@@ -80,6 +81,8 @@ def status(fd, poll):
                 # 6 temperature (id05): celle 1-4, MOSFET, ambiente = byte basso - 50
                 "temps": [f[53 + 2 * i] - 50 for i in range(6)],
                 "id06": f[66:76].hex(),
+                # bit di stato attivi (mappa dall'exe Windows, vedi flags.py)
+                "active": flags.active(f),
             }
     return None
 
