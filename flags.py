@@ -18,6 +18,8 @@ FLAGS = {
     (3, 0x02): ("Discharge Status", "stato"),
     (3, 0x04): ("Short_Circuit_Protection", "protezione/guasto"),
     (3, 0x08): ("OV_CUR_Protection", "protezione/guasto"),
+    (3, 0x10): ("Over_Voltage_Protect", "protezione/guasto"),
+    (3, 0x20): ("Under_Voltage_Protect", "protezione/guasto"),
     (3, 0x40): ("CHG_OV_TEMP_Protection", "protezione/guasto"),
     (3, 0x80): ("CHG_UN_TEMP_Protection", "protezione/guasto"),
     (4, 0x01): ("Ambient_Low_TEMP_Protection", "protezione/guasto"),
